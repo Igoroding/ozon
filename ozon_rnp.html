@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ozon — РнП Стольников</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0e17;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --border: #1e2d45;
+    --ozon: #005bff;
+    --ozon2: #0041cc;
+    --accent: #00c2ff;
+    --green: #00e096;
+    --red: #ff4757;
+    --yellow: #ffd32a;
+    --text: #e8eaf0;
+    --muted: #6b7a99;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .logo-badge {
+    background: var(--ozon);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .shop-name {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .btn-ai {
+    background: linear-gradient(135deg, var(--ozon), var(--accent));
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+  }
+
+  .btn-ai:hover { opacity: 0.85; }
+  .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* TABS */
+  .tabs-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--ozon); border-bottom-color: var(--ozon); }
+
+  /* MAIN */
+  .main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  /* PLAN BLOCK */
+  .plan-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .plan-block h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+
+  .plan-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .plan-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .plan-field label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .plan-field input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 13px;
+    width: 140px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .plan-field input:focus { border-color: var(--ozon); }
+
+  .btn-save {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-save:hover { border-color: var(--ozon); color: var(--ozon); }
+
+  /* PROGRESS BAR */
+  .progress-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .progress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .progress-item { }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .progress-values {
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .progress-values .current { color: var(--text); font-weight: 600; }
+  .progress-values .plan { color: var(--muted); }
+
+  .progress-bar-wrap {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .progress-pct { font-weight: 600; }
+
+  /* CHART */
+  .chart-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .chart-block h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+
+  .chart-wrap { height: 220px; }
+
+  /* TABLE */
+  .table-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .table-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 10px 16px;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  thead th:first-child { text-align: left; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+
+  tbody td {
+    padding: 9px 16px;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  tbody td:first-child {
+    text-align: left;
+    color: var(--muted);
+  }
+
+  .drr-ok { color: var(--green); }
+  .drr-warn { color: var(--yellow); }
+  .drr-bad { color: var(--red); }
+
+  .num-orders { color: var(--accent); font-weight: 600; }
+  .num-sum { color: var(--text); }
+  .num-ads { color: var(--muted); }
+
+  /* AI BLOCK */
+  .ai-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    min-height: 80px;
+    display: none;
+  }
+
+  .ai-block.visible { display: block; }
+
+  .ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .ai-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--ozon);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ai-content { line-height: 1.7; font-size: 13px; }
+  .ai-content b { color: var(--accent); }
+
+  /* EMPTY / LOADING STATES */
+  .state-msg {
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  /* UTILS */
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .main { padding: 12px; }
+    .plan-row { flex-direction: column; }
+    .plan-field input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <span class="logo-badge">OZON</span>
+      <span>РнП</span>
+    </div>
+    <span class="shop-name">Стольников</span>
+  </div>
+  <button class="btn-ai" onclick="runAI()" id="btn-ai">
+    ✨ AI-анализ
+  </button>
+</header>
+
+<div class="tabs-bar" id="tabs-bar"></div>
+
+<main class="main">
+
+  <!-- PLAN -->
+  <div class="plan-block">
+    <h3>План на месяц</h3>
+    <div class="plan-row">
+      <div class="plan-field">
+        <label>Заказы, ₽</label>
+        <input type="number" id="plan-orders" placeholder="0">
+      </div>
+      <div class="plan-field">
+        <label>Продажи, ₽</label>
+        <input type="number" id="plan-sales" placeholder="0">
+      </div>
+      <div class="plan-field">
+        <label>ДРР, %</label>
+        <input type="number" id="plan-drr" placeholder="10" step="0.1">
+      </div>
+      <button class="btn-save" onclick="savePlan()">Сохранить</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-block" id="progress-block">
+    <div class="progress-grid" id="progress-grid">
+      <div class="state-msg">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-block">
+    <h3>Заказы и реклама</h3>
+    <div class="chart-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-block">
+    <div class="table-header">По дням</div>
+    <div id="table-wrap">
+      <div class="state-msg">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- AI -->
+  <div class="ai-block" id="ai-block">
+    <div class="ai-loading" id="ai-loading">
+      <div class="ai-spinner"></div>
+      Анализирую данные...
+    </div>
+    <div class="ai-content" id="ai-content"></div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = 'https://gfwznqfbhrwpsvrpscbr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdmd3pucWZiaHJ3cHN2cnBzY2JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzEyMjcsImV4cCI6MjA4OTg0NzIyN30.cKI4cIgHRmkt57CioFB32LA3zTggQdLqlYtzZxyJezU';
+const AI_WEBHOOK = 'https://wbtrenz.app.n8n.cloud/webhook/wb-ai-v7';
+
+let currentMonth = '';
+let allData = [];
+let plan = { orders_plan: 0, sales_plan: 0, drr_plan: 10 };
+let chartInstance = null;
+
+const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY };
+
+async function fetchJSON(url) {
+  const r = await fetch(url, { headers });
+  return r.json();
+}
+
+// ---- MONTHS ----
+function getMonthsFromData(data) {
+  const months = [...new Set(data.map(r => r.date.slice(0, 7)))].sort();
+  return months;
+}
+
+function buildTabs(months) {
+  const bar = document.getElementById('tabs-bar');
+  bar.innerHTML = '';
+  months.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (m === currentMonth ? ' active' : '');
+    btn.textContent = formatMonth(m);
+    btn.onclick = () => selectMonth(m);
+    bar.appendChild(btn);
+  });
+}
+
+function formatMonth(m) {
+  const [y, mo] = m.split('-');
+  const names = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  return names[parseInt(mo) - 1] + ' ' + y;
+}
+
+function selectMonth(m) {
+  currentMonth = m;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.textContent === formatMonth(m));
+  });
+  loadPlan(m);
+  renderMonth(m);
+}
+
+// ---- LOAD DATA ----
+async function init() {
+  const data = await fetchJSON(`${SUPABASE_URL}/rest/v1/ozon_rnp?shop=eq.stolnikov&order=date.asc&limit=500`);
+  allData = data;
+
+  const months = getMonthsFromData(data);
+  if (!months.length) {
+    document.getElementById('table-wrap').innerHTML = '<div class="state-msg">Нет данных</div>';
+    document.getElementById('progress-grid').innerHTML = '<div class="state-msg">Нет данных</div>';
+    return;
+  }
+
+  currentMonth = months[months.length - 1];
+  buildTabs(months);
+  await loadPlan(currentMonth);
+  renderMonth(currentMonth);
+}
+
+// ---- PLAN ----
+async function loadPlan(month) {
+  const data = await fetchJSON(`${SUPABASE_URL}/rest/v1/ozon_plan?month=eq.${month}`);
+  if (data && data[0]) {
+    plan = data[0];
+    document.getElementById('plan-orders').value = plan.orders_plan || '';
+    document.getElementById('plan-sales').value = plan.sales_plan || '';
+    document.getElementById('plan-drr').value = plan.drr_plan || 10;
+  } else {
+    plan = { orders_plan: 0, sales_plan: 0, drr_plan: 10 };
+    document.getElementById('plan-orders').value = '';
+    document.getElementById('plan-sales').value = '';
+    document.getElementById('plan-drr').value = 10;
+  }
+}
+
+async function savePlan() {
+  const body = {
+    month: currentMonth,
+    orders_plan: parseFloat(document.getElementById('plan-orders').value) || 0,
+    sales_plan: parseFloat(document.getElementById('plan-sales').value) || 0,
+    drr_plan: parseFloat(document.getElementById('plan-drr').value) || 10,
+  };
+  await fetch(`${SUPABASE_URL}/rest/v1/ozon_plan`, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+    body: JSON.stringify(body)
+  });
+  plan = body;
+  renderMonth(currentMonth);
+}
+
+// ---- RENDER ----
+function renderMonth(month) {
+  const rows = allData.filter(r => r.date.startsWith(month)).sort((a, b) => a.date < b.date ? -1 : 1);
+  renderProgress(rows, month);
+  renderChart(rows);
+  renderTable(rows);
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ru-RU');
+}
+
+function renderProgress(rows, month) {
+  const totalOrders = rows.reduce((s, r) => s + (r.orders_sum || 0), 0);
+  const totalSales = rows.reduce((s, r) => s + (r.sales_sum || 0), 0);
+  const totalAds = rows.reduce((s, r) => s + (r.ads_spend || 0), 0);
+  const drr = totalOrders > 0 ? totalAds / totalOrders * 100 : 0;
+
+  // Прогноз
+  const today = new Date();
+  const [y, m] = month.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const daysPassed = month === today.toISOString().slice(0, 7)
+    ? today.getDate()
+    : daysInMonth;
+  const pace = daysPassed > 0 ? totalOrders / daysPassed * daysInMonth : 0;
+
+  const ordersP = plan.orders_plan > 0 ? totalOrders / plan.orders_plan * 100 : 0;
+  const salesP = plan.sales_plan > 0 ? totalSales / plan.sales_plan * 100 : 0;
+  const drrTarget = plan.drr_plan || 10;
+
+  const drrColor = drr <= drrTarget ? 'var(--green)' : drr <= drrTarget + 5 ? 'var(--yellow)' : 'var(--red)';
+  const ordersColor = ordersP >= 100 ? 'var(--green)' : ordersP >= 70 ? 'var(--accent)' : 'var(--ozon)';
+
+  document.getElementById('progress-grid').innerHTML = `
+    ${progressItem('Заказы (факт)', fmt(totalOrders) + ' ₽', plan.orders_plan > 0 ? fmt(plan.orders_plan) + ' ₽' : '—', ordersP, ordersColor, `Прогноз: ${fmt(pace)} ₽`, `${Math.round(ordersP)}%`)}
+    ${progressItem('Продажи (факт)', fmt(totalSales) + ' ₽', plan.sales_plan > 0 ? fmt(plan.sales_plan) + ' ₽' : '—', salesP, 'var(--accent)', `День ${daysPassed} из ${daysInMonth}`, `${Math.round(salesP)}%`)}
+    ${progressItem('ДРР', drr.toFixed(1) + '%', 'цель ' + drrTarget + '%', Math.min(drr / drrTarget * 100, 150), drrColor, `Реклама: ${fmt(totalAds)} ₽`, drr.toFixed(1) + '%')}
+  `;
+}
+
+function progressItem(label, current, planStr, pct, color, meta1, meta2) {
+  const w = Math.min(pct, 100);
+  return `
+    <div class="progress-item">
+      <div class="progress-header">
+        <span class="progress-label">${label}</span>
+        <span class="progress-values">
+          <span class="current">${current}</span>
+          <span class="plan"> / ${planStr}</span>
+        </span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width:${w}%;background:${color}"></div>
+      </div>
+      <div class="progress-meta">
+        <span>${meta1}</span>
+        <span class="progress-pct" style="color:${color}">${meta2}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderChart(rows) {
+  const labels = rows.map(r => r.date.slice(5));
+  const orders = rows.map(r => r.orders_sum || 0);
+  const ads = rows.map(r => r.ads_spend || 0);
+
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Заказы ₽',
+          data: orders,
+          backgroundColor: 'rgba(0, 91, 255, 0.7)',
+          borderColor: '#005bff',
+          borderWidth: 1,
+          borderRadius: 3,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Реклама ₽',
+          data: ads,
+          type: 'line',
+          borderColor: '#00c2ff',
+          backgroundColor: 'rgba(0, 194, 255, 0.1)',
+          borderWidth: 2,
+          pointRadius: 2,
+          tension: 0.4,
+          yAxisID: 'y',
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index' },
+      plugins: {
+        legend: { labels: { color: '#6b7a99', font: { family: 'JetBrains Mono', size: 11 } } },
+        tooltip: { backgroundColor: '#1a2235', borderColor: '#1e2d45', borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { color: '#1e2d45' }, ticks: { color: '#6b7a99', font: { family: 'JetBrains Mono', size: 10 } } },
+        y: { grid: { color: '#1e2d45' }, ticks: { color: '#6b7a99', font: { family: 'JetBrains Mono', size: 10 }, callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+function renderTable(rows) {
+  if (!rows.length) {
+    document.getElementById('table-wrap').innerHTML = '<div class="state-msg">Нет данных за этот период</div>';
+    return;
+  }
+
+  const drrTarget = plan.drr_plan || 10;
+  const sorted = [...rows].sort((a, b) => a.date > b.date ? -1 : 1);
+
+  const html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Заказов шт</th>
+          <th>Заказы ₽</th>
+          <th>Продаж шт</th>
+          <th>Продажи ₽</th>
+          <th>Реклама ₽</th>
+          <th>ДРР %</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sorted.map(r => {
+          const drr = r.orders_sum > 0 ? r.ads_spend / r.orders_sum * 100 : 0;
+          const drrClass = drr <= drrTarget ? 'drr-ok' : drr <= drrTarget + 5 ? 'drr-warn' : 'drr-bad';
+          const dow = ['вс','пн','вт','ср','чт','пт','сб'][new Date(r.date).getDay()];
+          return `<tr>
+            <td>${r.date.slice(5)} <span style="color:var(--muted);font-size:10px">${dow}</span></td>
+            <td class="num-orders">${r.orders_count || 0}</td>
+            <td class="num-sum">${fmt(r.orders_sum || 0)}</td>
+            <td>${r.sales_count || 0}</td>
+            <td class="num-sum">${fmt(r.sales_sum || 0)}</td>
+            <td class="num-ads">${fmt(r.ads_spend || 0)}</td>
+            <td class="${drrClass}">${drr.toFixed(1)}%</td>
+          </tr>`;
+        }).join('')}
+        <tr style="border-top: 2px solid var(--border); font-weight:600">
+          <td>ИТОГО</td>
+          <td class="num-orders">${sorted.reduce((s,r)=>s+(r.orders_count||0),0)}</td>
+          <td class="num-sum">${fmt(sorted.reduce((s,r)=>s+(r.orders_sum||0),0))}</td>
+          <td>${sorted.reduce((s,r)=>s+(r.sales_count||0),0)}</td>
+          <td class="num-sum">${fmt(sorted.reduce((s,r)=>s+(r.sales_sum||0),0))}</td>
+          <td class="num-ads">${fmt(sorted.reduce((s,r)=>s+(r.ads_spend||0),0))}</td>
+          <td class="${(() => {
+            const ta = sorted.reduce((s,r)=>s+(r.ads_spend||0),0);
+            const to = sorted.reduce((s,r)=>s+(r.orders_sum||0),0);
+            const d = to > 0 ? ta/to*100 : 0;
+            return d <= drrTarget ? 'drr-ok' : d <= drrTarget+5 ? 'drr-warn' : 'drr-bad';
+          })()}">${(() => {
+            const ta = sorted.reduce((s,r)=>s+(r.ads_spend||0),0);
+            const to = sorted.reduce((s,r)=>s+(r.orders_sum||0),0);
+            return to > 0 ? (ta/to*100).toFixed(1)+'%' : '—';
+          })()}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+  document.getElementById('table-wrap').innerHTML = html;
+}
+
+// ---- AI ----
+async function runAI() {
+  const btn = document.getElementById('btn-ai');
+  btn.disabled = true;
+
+  const block = document.getElementById('ai-block');
+  const loading = document.getElementById('ai-loading');
+  const content = document.getElementById('ai-content');
+
+  block.classList.add('visible');
+  loading.style.display = 'flex';
+  content.innerHTML = '';
+
+  const rows = allData.filter(r => r.date.startsWith(currentMonth)).sort((a, b) => a.date < b.date ? -1 : 1);
+
+  const totalOrders = rows.reduce((s, r) => s + (r.orders_sum || 0), 0);
+  const totalAds = rows.reduce((s, r) => s + (r.ads_spend || 0), 0);
+  const drr = totalOrders > 0 ? (totalAds / totalOrders * 100).toFixed(1) : '0';
+
+  const today = new Date();
+  const [y, m] = currentMonth.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const daysPassed = currentMonth === today.toISOString().slice(0, 7) ? today.getDate() : daysInMonth;
+  const pace = daysPassed > 0 ? totalOrders / daysPassed * daysInMonth : 0;
+
+  const tableStr = rows.map(r => {
+    const d = r.orders_sum > 0 ? (r.ads_spend / r.orders_sum * 100).toFixed(1) : '0';
+    return `${r.date}: заказы=${fmt(r.orders_sum||0)}₽ (${r.orders_count||0}шт), продажи=${fmt(r.sales_sum||0)}₽ (${r.sales_count||0}шт), реклама=${fmt(r.ads_spend||0)}₽, ДРР=${d}%`;
+  }).join('\n');
+
+  const prompt = `Платформа: OZON (не Wildberries)
+Магазин: Стольников
+Месяц: ${formatMonth(currentMonth)}
+
+ДАННЫЕ ПО ДНЯМ:
+${tableStr}
+
+ИТОГО:
+- Заказы: ${fmt(totalOrders)} ₽
+- Реклама: ${fmt(totalAds)} ₽
+- ДРР факт: ${drr}%
+
+ПЛАН НА МЕСЯЦ:
+- Заказы: ${fmt(plan.orders_plan || 0)} ₽
+- Продажи: ${fmt(plan.sales_plan || 0)} ₽
+- ДРР ${plan.drr_plan || 10}%
+
+ПРОГНОЗ:
+- Прогноз заказов по текущему темпу: ${fmt(pace)} ₽
+- Прошло дней: ${daysPassed} из ${daysInMonth}
+
+Проанализируй данные Ozon. Учти специфику: семена растений, сезон март (начало садового сезона — спрос растёт).`;
+
+  try {
+    const resp = await fetch(AI_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const text = await resp.text();
+    loading.style.display = 'none';
+    content.innerHTML = text;
+  } catch (e) {
+    loading.style.display = 'none';
+    content.innerHTML = '<span style="color:var(--red)">Ошибка при запросе к AI</span>';
+  }
+
+  btn.disabled = false;
+}
+
+init();
+</script>
+</body>
+</html>

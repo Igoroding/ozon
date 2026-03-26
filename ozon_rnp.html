@@ -152,12 +152,12 @@
 
     <!-- Toggle -->
     <div class="view-toggle">
-      <div class="vt" onclick="setView('table',this)">📋 Таблица</div>
-      <div class="vt active" onclick="setView('chart',this)">📈 График</div>
+      <div class="vt active" onclick="setView('table',this)">📋 Таблица</div>
+      <div class="vt" onclick="setView('chart',this)">📈 График</div>
     </div>
 
     <!-- Chart -->
-    <div class="chart-wrap" id="chart-wrap">
+    <div class="chart-wrap" id="chart-wrap" style="display:none">
       <div class="chart-title">Динамика за месяц</div>
       <div class="chart-legend">
         <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#005bff"></div>Заказы ₽</div>
@@ -168,7 +168,7 @@
     </div>
 
     <!-- Table -->
-    <div class="tbl-wrap" id="tbl-wrap" style="display:none">
+    <div class="tbl-wrap" id="tbl-wrap">
       <table>
         <thead>
           <tr>
@@ -207,7 +207,7 @@ const WEBHOOK_URL = 'https://wbtrenz.app.n8n.cloud/webhook/wb-ai-v7';
 let currentMonth = '';
 let plan = { orders_plan: 0, sales_plan: 0, drr_plan: 10 };
 let aiMessages = [];
-let currentView = 'chart';
+let currentView = 'table';
 
 const fmtRub = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
 const fmtN   = n => new Intl.NumberFormat('ru-RU').format(Math.round(n));

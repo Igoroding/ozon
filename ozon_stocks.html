@@ -15,7 +15,22 @@
   .controls { padding:14px 24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-bottom:1px solid #1a2333; position:relative; z-index:5; }
   .view-tab { background:#1a2333; border:1px solid #1e2d45; border-radius:8px; padding:6px 14px; cursor:pointer; font-size:12px; color:#718096; transition:all .2s; }
   .view-tab.active { background:rgba(0,91,255,0.15); border-color:#005bff; color:#005bff; }
-  .info { margin-left:auto; font-size:12px; color:#4a5568; }
+  .info { font-size:12px; color:#4a5568; }
+
+  /* Period selector */
+  .period-bar { padding:10px 24px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; border-bottom:1px solid #1a2333; position:relative; z-index:5; background:#080c10; }
+  .period-label { font-size:11px; color:#4a5568; text-transform:uppercase; letter-spacing:1px; margin-right:4px; }
+  .period-btn { background:#0d1117; border:1px solid #1a2333; border-radius:7px; padding:5px 14px; cursor:pointer; font-size:12px; font-weight:600; color:#718096; transition:all .2s; font-family:'Geologica',sans-serif; }
+  .period-btn:hover { border-color:#2a3a4a; color:#9aa5be; }
+  .period-btn.active { background:rgba(0,91,255,0.12); border-color:#005bff; color:#3b9eff; }
+  .period-sep { width:1px; height:18px; background:#1a2333; margin:0 4px; }
+  .period-custom { display:flex; align-items:center; gap:6px; }
+  .period-custom input[type=date] { background:#0d1117; border:1px solid #1a2333; border-radius:7px; padding:4px 10px; color:#9aa5be; font-size:12px; font-family:'Geologica',sans-serif; cursor:pointer; }
+  .period-custom input[type=date]:focus { outline:none; border-color:#005bff; }
+  .period-custom input[type=date]::-webkit-calendar-picker-indicator { filter:invert(0.4); cursor:pointer; }
+  .period-apply { background:#005bff; border:none; border-radius:7px; padding:5px 12px; color:#fff; font-size:12px; font-weight:700; cursor:pointer; font-family:'Geologica',sans-serif; transition:opacity .2s; }
+  .period-apply:hover { opacity:0.85; }
+  .period-info { margin-left:auto; font-size:11px; color:#4a5568; }
 
   /* Summary bar */
   .summary-bar { display:flex; gap:16px; padding:14px 24px; border-bottom:1px solid #1a2333; flex-wrap:wrap; align-items:center; position:relative; z-index:5; }
@@ -99,6 +114,23 @@
   <div class="view-tab" id="vt-risk" onclick="setView('risk',this)">⚠️ Только риски</div>
   <div class="info" id="info">Загрузка...</div>
   <button class="ai-btn" id="ai-btn" onclick="runStocksAI()" style="margin-left:auto">✨ AI-анализ склада</button>
+</div>
+
+<!-- Period selector -->
+<div class="period-bar" id="period-bar" style="display:none">
+  <span class="period-label">Период:</span>
+  <button class="period-btn" data-days="7"   onclick="setPeriod(7,this)">7 дней</button>
+  <button class="period-btn active" data-days="14"  onclick="setPeriod(14,this)">14 дней</button>
+  <button class="period-btn" data-days="30"  onclick="setPeriod(30,this)">30 дней</button>
+  <button class="period-btn" data-days="all" onclick="setPeriod('all',this)">Все данные</button>
+  <div class="period-sep"></div>
+  <div class="period-custom">
+    <input type="date" id="date-from" title="С">
+    <span style="color:#4a5568;font-size:12px">—</span>
+    <input type="date" id="date-to" title="По">
+    <button class="period-apply" onclick="applyCustomPeriod()">Применить</button>
+  </div>
+  <span class="period-info" id="period-info"></span>
 </div>
 
 <!-- Summary bar -->
@@ -187,6 +219,53 @@ let lastPivot = {};
 let lastDates = [];
 let lastRiskItems = [];
 
+// Period state
+let periodMode = 'preset';
+let periodDays = 14;
+let periodFrom = null;
+let periodTo   = null;
+
+function getVisibleDates() {
+  if (!lastDates.length) return lastDates;
+  if (periodMode === 'custom' && periodFrom && periodTo) {
+    return lastDates.filter(d => d >= periodFrom && d <= periodTo);
+  }
+  if (periodDays === 'all') return lastDates;
+  return lastDates.slice(-periodDays);
+}
+
+function setPeriod(days, el) {
+  periodMode = 'preset';
+  periodDays = days;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('date-from').value = '';
+  document.getElementById('date-to').value = '';
+  renderTable();
+  updatePeriodInfo();
+}
+
+function applyCustomPeriod() {
+  const from = document.getElementById('date-from').value;
+  const to   = document.getElementById('date-to').value;
+  if (!from || !to) return;
+  if (from > to) { alert('Дата «С» должна быть раньше «По»'); return; }
+  periodMode = 'custom';
+  periodFrom = from;
+  periodTo   = to;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  renderTable();
+  updatePeriodInfo();
+}
+
+function updatePeriodInfo() {
+  const visible = getVisibleDates();
+  const el = document.getElementById('period-info');
+  if (!visible.length) { el.textContent = ''; return; }
+  const fmt = d => { const [y,m,day]=d.split('-'); return parseInt(day)+'.'+parseInt(m)+'.'+y.slice(2); };
+  el.textContent = fmt(visible[0]) + ' — ' + fmt(visible[visible.length-1]) + ' · ' + visible.length + ' дн.';
+}
+
 async function loadStocks() {
   document.getElementById('loading').style.display = 'block';
   document.getElementById('table-wrap').style.display = 'none';
@@ -273,7 +352,7 @@ async function loadStocks() {
   document.getElementById('sc-risk-val').textContent = riskCount;
   document.getElementById('sc-risk-sub').textContent = riskCount > 0 ? 'нужна поставка' : '✓ запасов хватает';
   document.getElementById('summary-bar').style.display = 'flex';
-  document.getElementById('info').textContent = `${articles.length} артикулов · ${dates.length} дней · Ozon FBO`;
+  document.getElementById('info').textContent = articles.length + ' артикулов · всего ' + dates.length + ' дней · Ozon FBO';
 
   // --- Risk panel ---
   if (lastRiskItems.length > 0) {
@@ -292,17 +371,45 @@ async function loadStocks() {
     document.getElementById('risk-panel').style.display = 'block';
   }
 
-  // --- Render table ---
-  const fmtDate = d => { const [y,m,day] = d.split('-'); return `${parseInt(day)}/${parseInt(m)}`; };
+  // Store new arrivals for renderTable
+  window._newArrival = newArrival;
+  window._riskMap    = riskMap;
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('table-wrap').style.display = 'block';
+
+  // Show period bar & init date inputs bounds
+  const periodBarEl = document.getElementById('period-bar');
+  periodBarEl.style.display = 'flex';
+  if (dates.length) {
+    document.getElementById('date-from').min = dates[0];
+    document.getElementById('date-from').max = dates[dates.length-1];
+    document.getElementById('date-to').min   = dates[0];
+    document.getElementById('date-to').max   = dates[dates.length-1];
+  }
+  renderTable();
+  updatePeriodInfo();
+}
+
+function renderTable() {
+  const pivot    = lastPivot;
+  const allDates = lastDates;
+  const articles = WATCH_LIST;
+  const riskMap  = window._riskMap    || {};
+  const newArrival = window._newArrival || new Set();
+  const today    = allDates[allDates.length - 1] || '';
+
+  const dates = getVisibleDates();
+
+  const fmtDate = d => { const [y,m,day] = d.split('-'); return parseInt(day)+'/'+parseInt(m); };
 
   const filteredArticles = currentView === 'risk'
     ? articles.filter(a => riskMap[a])
     : articles;
 
-  document.getElementById('thead').innerHTML = `<tr>
-    <th class="art-col">Артикул товара</th>
-    ${dates.map(d => `<th${d === today ? ' class="today-col"' : ''}>${fmtDate(d)}</th>`).join('')}
-  </tr>`;
+  document.getElementById('thead').innerHTML = '<tr><th class="art-col">Артикул товара</th>' +
+    dates.map(d => '<th' + (d === today ? ' class="today-col"' : '') + '>' + fmtDate(d) + '</th>').join('') +
+    '</tr>';
 
   document.getElementById('tbody').innerHTML = filteredArticles.map(art => {
     const isRisk = !!riskMap[art];
@@ -317,22 +424,17 @@ async function loadStocks() {
       else if (qty > 0) cls = 'qty-low';
       else cls = 'qty-zero';
       const todayCls = isToday ? ' qty-today' : '';
-      return `<td class="qty ${cls}${todayCls}">${qty}</td>`;
+      return '<td class="qty ' + cls + todayCls + '">' + qty + '</td>';
     }).join('');
-    return `<tr class="${isRisk ? 'risk-row-tr' : ''}">
-      <td class="art-col${isRisk ? ' risk-row' : ''}">${art}</td>${cells}
-    </tr>`;
+    return '<tr class="' + (isRisk ? 'risk-row-tr' : '') + '"><td class="art-col' + (isRisk ? ' risk-row' : '') + '">' + art + '</td>' + cells + '</tr>';
   }).join('');
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('table-wrap').style.display = 'block';
 }
 
 function setView(view, el) {
   currentView = view;
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  loadStocks();
+  renderTable();
 }
 
 let riskOpen = true;

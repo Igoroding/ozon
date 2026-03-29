@@ -117,21 +117,6 @@
 </div>
 
 <!-- Period selector -->
-<div class="period-bar" id="period-bar" style="display:none">
-  <span class="period-label">Период:</span>
-  <button class="period-btn" data-days="7"   onclick="setPeriod(7,this)">7 дней</button>
-  <button class="period-btn active" data-days="14"  onclick="setPeriod(14,this)">14 дней</button>
-  <button class="period-btn" data-days="30"  onclick="setPeriod(30,this)">30 дней</button>
-  <button class="period-btn" data-days="all" onclick="setPeriod('all',this)">Все данные</button>
-  <div class="period-sep"></div>
-  <div class="period-custom">
-    <input type="date" id="date-from" title="С">
-    <span style="color:#4a5568;font-size:12px">—</span>
-    <input type="date" id="date-to" title="По">
-    <button class="period-apply" onclick="applyCustomPeriod()">Применить</button>
-  </div>
-  <span class="period-info" id="period-info"></span>
-</div>
 
 <!-- Summary bar -->
 <div class="summary-bar" id="summary-bar" style="display:none">
@@ -181,6 +166,22 @@
   <div class="legend-item"><div class="dot" style="background:#ff3333"></div> 0 — нет на складе</div>
   <div class="legend-item"><div class="dot" style="background:#3b9eff"></div> Новое поступление</div>
   <div class="legend-item"><span style="color:#ff8080">⚠ артикул</span> — риск обнуления &lt;10 дней</div>
+</div>
+
+<div class="period-bar" id="period-bar" style="display:none">
+  <span class="period-label">Период:</span>
+  <button class="period-btn" data-days="7"   onclick="setPeriod(7,this)">7 дней</button>
+  <button class="period-btn active" data-days="14"  onclick="setPeriod(14,this)">14 дней</button>
+  <button class="period-btn" data-days="30"  onclick="setPeriod(30,this)">30 дней</button>
+  <button class="period-btn" data-days="all" onclick="setPeriod('all',this)">Все данные</button>
+  <div class="period-sep"></div>
+  <div class="period-custom">
+    <input type="date" id="date-from" title="С">
+    <span style="color:#4a5568;font-size:12px">—</span>
+    <input type="date" id="date-to" title="По">
+    <button class="period-apply" onclick="applyCustomPeriod()">Применить</button>
+  </div>
+  <span class="period-info" id="period-info"></span>
 </div>
 
 <div id="loading" class="loading"><div class="spinner"></div>Загружаем данные...</div>
